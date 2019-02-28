@@ -17,6 +17,8 @@ pip install https://github.com/vokai/django-video-embedding/
 INSTALLED_APPS = (
     'django_video_embedding',
 )
+
+
 [models.py]
 from embed_video.fields import EmbedVideoField
 
