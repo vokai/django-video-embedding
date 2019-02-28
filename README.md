@@ -20,7 +20,7 @@ INSTALLED_APPS = (
 
 
 [models.py]
-from embed_video.fields import EmbedVideoField
+from django_embedding_video.fields import VideoField
 
 class Item(models.Model):
     video = VideoField()  # same like models.URLField()
