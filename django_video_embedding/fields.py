@@ -55,7 +55,6 @@ class VideoFormField(forms.FileField):
     }
 
     def check_is_video(self, videofile_path):
-        print(videofile_path)
         try:
             returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])                
             serialized = json.loads(returned_data)
@@ -63,8 +62,6 @@ class VideoFormField(forms.FileField):
             codec = codec_name.split(',')
             matching = False
             for item in codec:
-                print(item)
-                print(codec_list)
                 if item in codec_list:
                     matching = True
                 #matching = [s for s in codec_list if item.strip(' ').lower() in s]
