@@ -7,12 +7,7 @@ Django video embedding is a Python-Django library to have custom VideoField in m
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install:
 
 ```bash
-pip install https://github.com/vokai/django-video-embedding/
-```
-or add it to requirements.txt
-
-```bash
-git+https://github.com/vokai/django-video-embedding/
+pip install django-video-embedding 
 ```
 
 ## Usage
