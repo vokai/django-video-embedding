@@ -5,7 +5,7 @@ setup(
     name='django_video_embedding',
     version='0.1.1',
     description='Support for video upload in Django models',
-    long_description=open('README.rst', 'r').read(),
+    long_description='Support for video upload in Django models',
     author='4Sigma',
     author_email='info@4sigma.it',
     url='https://github.com/vokai/django-video-embedding',

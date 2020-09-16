@@ -181,6 +181,9 @@ class VideoField(FileField):
 
         return []
 
+    def get_absolute_video_name(self):
+        return True
+
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         if self.width_field:
