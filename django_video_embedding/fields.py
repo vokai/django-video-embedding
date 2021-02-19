@@ -167,7 +167,8 @@ class VideoField(FileField):
         ]
 
     def _check_ffprobe_installed(self):
-        exit_code = subprocess.call(['which', 'ffprobe'])
+        FNULL = open(os.devnull, 'w')
+        exit_code = subprocess.call(['which', 'ffprobe'], stdout=FNULL,  stderr=subprocess.STDOUT)
 
         if not exit_code == 0:
             return [
