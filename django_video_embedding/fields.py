@@ -112,7 +112,7 @@ class VideoFile(File):
     
     
     def get_dimension(self):
-        videofile_path = self.file.str()
+        videofile_path = self.file.__str__()
         returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])
         width = None
         height = None
