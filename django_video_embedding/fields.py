@@ -114,16 +114,24 @@ class VideoFile(File):
     def get_dimension(self):
         videofile_path = self.file.str()
         returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])
-        width = 0
-        height = 0
+        width = None
+        height = None
         serialized = json.loads(returned_data)
         if bool(serialized) and 'streams' in serialized and len(serialized['streams']) > 0:
-            if 'width' in serialized['streams'][0]:
-                width = serialized['streams'][0]['width']
-            if 'height' in serialized['streams'][0]:
-                height = serialized['streams'][0]['height']
+            for s in serialized['streams']:
+                if 'width' in s:
+                    width = s['width']
+                if 'height' in s:
+                    height = s['height']
+                if width and height:
+                    break
+        if width is None:
+            width = 0
+        if height is None:
+            height = 0
         dimension = {'width': width, 'height': height}
         return dimension
+
     
     @property
     def dimension(self):
