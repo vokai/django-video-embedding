@@ -55,6 +55,11 @@ class VideoFormField(forms.FileField):
     }
 
     def check_is_video(self, videofile_path):
+        if 'http://' in self.file.url or 'https://' in self.file.url:
+            videofile_path = self.file.url
+        else:
+            videofile_path = self.file.str()
+
         try:
             returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])                
             serialized = json.loads(returned_data)
@@ -112,7 +117,12 @@ class VideoFile(File):
     
     
     def get_dimension(self):
-        videofile_path = self.file.__str__()
+        if 'http://' in self.file.url or 'https://' in self.file.url:
+            videofile_path = self.file.url
+        else:
+            videofile_path = self.file.str()
+
+        # videofile_path = self.file.__str__()
         returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])
         width = None
         height = None
