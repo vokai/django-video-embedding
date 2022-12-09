@@ -3,6 +3,7 @@ import tempfile, io
 from io import BytesIO
 from django import forms
 from django.core import checks
+from django.core.files.storage import default_storage
 from django.db.models.fields.files import FieldFile, FileDescriptor, FileField
 from django.core.files.base import File
 from django.utils.translation import gettext_lazy as _
@@ -54,14 +55,14 @@ class VideoFormField(forms.FileField):
         )
     }
 
-    def check_is_video(self, videofile_path):
-        if 'http://' in self.file.url or 'https://' in self.file.url:
-            videofile_path = self.file.url
-        else:
-            videofile_path = self.file.str()
-
+    def check_is_video(self, file):
+        # if 'http://' in file or 'https://' in file:
+        #     videofile_path = file
+        # else:
+        #     videofile_path = file
+        videofile_path = file
         try:
-            returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])                
+            returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])
             serialized = json.loads(returned_data)
             codec_name = serialized['format']['format_name']
             codec = codec_name.split(',')
@@ -75,7 +76,7 @@ class VideoFormField(forms.FileField):
             return True
         except subprocess.CalledProcessError as e:
             return False
-    
+
     def to_python(self, data):
         """
         Check that the file-upload field data contains a valid image (GIF, JPG,
@@ -89,16 +90,16 @@ class VideoFormField(forms.FileField):
         if hasattr(data, 'temporary_file_path'):
             file = data.temporary_file_path()
         else:
-            if hasattr(data, 'read'):       
+            if hasattr(data, 'read'):
                 content = data.read()
             else:
                 content = data['content']
 
             fd, file = tempfile.mkstemp()
 
-            with io.open(fd, 'wb') as fs:  
+            with io.open(fd, 'wb') as fs:
                 fs.write(content)
-        
+
         if not self.check_is_video(file):
             raise forms.ValidationError(
                 self.error_messages['invalid_video'],
@@ -114,16 +115,14 @@ class VideoFile(File):
     Just like the FieldFile, but for VideoFieldFiels. The only difference is
     opening the file with ffprobe and returning width and height
     """
-    
-    
-    def get_dimension(self):
-        if 'http://' in self.file.url or 'https://' in self.file.url:
-            videofile_path = self.file.url
-        else:
-            videofile_path = self.file.str()
 
-        # videofile_path = self.file.__str__()
-        returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])
+    def get_dimension(self):
+        videofile_url = default_storage.url(self.name)
+        if 'http://' in videofile_url or 'https://' in videofile_url:
+            returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_url])
+        else:
+            videofile_path = default_storage.path(self.name)
+            returned_data = subprocess.check_output(['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videofile_path])
         width = None
         height = None
         serialized = json.loads(returned_data)
@@ -142,7 +141,7 @@ class VideoFile(File):
         dimension = {'width': width, 'height': height}
         return dimension
 
-    
+
     @property
     def dimension(self):
         return self.get_dimension()
@@ -174,12 +173,12 @@ class VideoFileDescriptor(FileDescriptor):
         # update right here.
         if previous_file is not None:
             self.field.update_dimension_fields(instance, force=True)
-            
+
 class VideoField(FileField):
     attr_class = VideoFieldFile
     descriptor_class = VideoFileDescriptor
     description = _("Video")
-    
+
     def __init__(self, verbose_name=None, name=None, width_field=None, height_field=None, **kwargs):
         self.width_field, self.height_field = width_field, height_field
         super().__init__(verbose_name, name, **kwargs)

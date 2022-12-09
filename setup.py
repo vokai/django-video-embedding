@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='django_video_embedding',
-    version='2.7',
+    version='3.5',
     description='Support for video upload in Django models',
     long_description='Support for video upload in Django models',
     author='4Sigma',
